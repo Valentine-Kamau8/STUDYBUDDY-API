@@ -20,4 +20,3 @@ It helps you manage study tasks (like AI bootcamp assignments) using simple CRUD
 
 ---
 
-## Project Structure
