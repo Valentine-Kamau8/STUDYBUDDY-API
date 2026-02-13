@@ -1,0 +1,9 @@
+#404 if task not found
+{ "error": "Task not found" }
+
+#400 invalid JSON body
+{ "error": "Invalid JSON body" }
+
+#422 validation errors
+{ "error": "Title is required" }
+
