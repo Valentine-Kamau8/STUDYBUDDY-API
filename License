@@ -1,0 +1,5 @@
+
+---
+
+If you want to make it feel **more “AI bootcamp”**, I can add one extra endpoint like:
+- `POST /ai/summarize` to summarize your tasks (either simple Ruby logic, or OpenAI API if allowed).
