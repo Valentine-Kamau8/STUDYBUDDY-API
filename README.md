@@ -1,7 +1,7 @@
 # StudyBuddy API (Ruby + Sinatra)
 
 A beginner-friendly REST API built with **Ruby** and **Sinatra**.  
-It helps you manage study tasks (like AI bootcamp assignments) using simple CRUD endpoints.
+It helps you manage study tasks using simple CRUD endpoints.
 
 ## Features
 - Create a task
