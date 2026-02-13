@@ -1,0 +1,127 @@
+# api.rb
+require "sinatra"
+require "sinatra/json"
+require "sinatra/reloader" if development?
+require "sequel"
+require "json"
+require "time"
+
+DB = Sequel.sqlite(File.join(__dir__, "db", "development.sqlite3"))
+
+# Create table automatically if it doesn't exist (nice for beginners)
+unless DB.table_exists?(:tasks)
+  DB.create_table :tasks do
+    primary_key :id
+    String :title, null: false
+    String :description
+    String :status, null: false, default: "pending"
+    DateTime :created_at, null: false
+    DateTime :updated_at, null: false
+  end
+end
+
+Tasks = DB[:tasks]
+
+before do
+  content_type :json
+end
+
+helpers do
+  def parse_json_body
+    request.body.rewind
+    raw = request.body.read
+    return {} if raw.nil? || raw.strip.empty?
+    JSON.parse(raw)
+  rescue JSON::ParserError
+    halt 400, json(error: "Invalid JSON body")
+  end
+
+  def find_task!(id)
+    task = Tasks.where(id: id).first
+    halt 404, json(error: "Task not found") unless task
+    task
+  end
+
+  def now
+    Time.now
+  end
+
+  def permitted_status?(value)
+    %w[pending in_progress done].include?(value)
+  end
+end
+
+# Health check
+get "/" do
+  json message: "StudyBuddy API is running"
+end
+
+# GET /tasks - list all tasks
+get "/tasks" do
+  tasks = Tasks.order(:id).all
+  json tasks
+end
+
+# GET /tasks/:id - get one task
+get "/tasks/:id" do
+  task = find_task!(params[:id].to_i)
+  json task
+end
+
+# POST /tasks - create a task
+post "/tasks" do
+  data = parse_json_body
+
+  title = data["title"]&.strip
+  description = data["description"]
+  status = (data["status"] || "pending").strip
+
+  halt 422, json(error: "Title is required") if title.nil? || title.empty?
+  halt 422, json(error: "Status must be one of: pending, in_progress, done") unless permitted_status?(status)
+
+  timestamp = now
+
+  id = Tasks.insert(
+    title: title,
+    description: description,
+    status: status,
+    created_at: timestamp,
+    updated_at: timestamp
+  )
+
+  task = Tasks.where(id: id).first
+  status 201
+  json task
+end
+
+# PUT /tasks/:id - update a task
+put "/tasks/:id" do
+  id = params[:id].to_i
+  task = find_task!(id)
+  data = parse_json_body
+
+  updates = {}
+  updates[:title] = data["title"].strip if data["title"].is_a?(String) && !data["title"].strip.empty?
+  updates[:description] = data["description"] if data.key?("description")
+
+  if data.key?("status")
+    new_status = data["status"].to_s.strip
+    halt 422, json(error: "Status must be one of: pending, in_progress, done") unless permitted_status?(new_status)
+    updates[:status] = new_status
+  end
+
+  halt 422, json(error: "No valid fields to update") if updates.empty?
+
+  updates[:updated_at] = now
+  Tasks.where(id: task[:id]).update(updates)
+
+  json Tasks.where(id: id).first
+end
+
+# DELETE /tasks/:id - delete a task
+delete "/tasks/:id" do
+  id = params[:id].to_i
+  find_task!(id) # ensure it exists
+  Tasks.where(id: id).delete
+  json message: "Task deleted"
+end
