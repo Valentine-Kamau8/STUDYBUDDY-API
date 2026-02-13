@@ -1,0 +1,8 @@
+studybuddy_api/
+├─ app.rb
+├─ Gemfile
+├─ db/
+│  ├─ development.sqlite3        (auto-created)
+│  └─ migrate/
+│     └─ 001_create_tasks.rb
+└─ README.md
