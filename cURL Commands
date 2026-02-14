@@ -1,0 +1,56 @@
+Create:
+curl -X POST http://localhost:4567/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Read Sinatra docs","description":"Learn routing","status":"pending"}'
+
+List:
+curl http://localhost:4567/tasks
+
+Get one:
+curl http://localhost:4567/tasks/1
+
+Update:
+curl -X PUT http://localhost:4567/tasks/1 \
+  -H "Content-Type: application/json" \
+  -d '{"status":"done"}'
+
+Delete:
+curl -X DELETE http://localhost:4567/tasks/1
+
+
+Error Handling
+
+
+404 if task not found:
+
+
+{ "error": "Task not found" }
+
+
+
+400 invalid JSON body:
+
+
+{ "error": "Invalid JSON body" }
+
+
+
+422 validation errors:
+
+
+{ "error": "Title is required" }
+
+
+Future Improvements (Optional)
+
+
+Add pagination to /tasks
+
+
+Add search/filter by status
+
+
+Add authentication (JWT)
+
+
+Add AI feature: generate a study pla
